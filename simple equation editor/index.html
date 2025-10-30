@@ -52,7 +52,7 @@
             border-radius: 0.5rem;
             background-color: #F9FAFB; /* gray-50 */
             border: 1px dashed #D1D5DB; /* gray-300 */
-            transition: all 0.2s ease-in-out;
+            transition: background-color 0.2s ease-in-out;
             color: #111827; /* default text-gray-900 */
             line-height: 1.75; /* Added vertical buffer for readability */
         }
@@ -75,6 +75,16 @@
         }
         .color-swatch.active {
             border-color: #3B82F6; /* blue-500 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+        /* Style for selection formatting buttons */
+        .selection-size-btn:active,
+        .selection-color-btn:active {
+            transform: scale(0.95);
+        }
+        .selection-size-btn:focus,
+        .selection-color-btn:focus {
+            outline: none;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
         }
     </style>
@@ -108,7 +118,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Font Size -->
                     <div>
-                        <label for="font-size-select" class="text-sm font-medium text-gray-700">Font Size</label>
+                        <label for="font-size-select" class="text-sm font-medium text-gray-700">Preview Font Size</label>
                         <select id="font-size-select" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                             <option value="text-base">Small</option>
                             <option value="text-lg" selected>Medium</option>
@@ -118,12 +128,51 @@
                     </div>
                     <!-- Font Color -->
                     <div>
-                        <label class="text-sm font-medium text-gray-700">Font Color</label>
+                        <label class="text-sm font-medium text-gray-700">Preview Font Color</label>
                         <div id="color-buttons-container" data-color="text-gray-900" class="mt-2 flex space-x-2">
                             <button class="color-swatch bg-gray-900 active" data-color-class="text-gray-900" title="Black"></button>
                             <button class="color-swatch bg-red-600" data-color-class="text-red-600" title="Red"></button>
                             <button class="color-swatch bg-blue-600" data-color-class="text-blue-600" title="Blue"></button>
                             <button class="color-swatch bg-green-600" data-color-class="text-green-600" title="Green"></button>
+                        </div>
+                    </div>
+                    <!-- Background Color -->
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Preview Background Color</label>
+                        <div class="mt-2 flex items-center space-x-2">
+                            <input type="color" id="bg-color-picker" value="#F9FAFB" class="h-10 w-20 border border-gray-300 rounded cursor-pointer">
+                            <button id="reset-bg-btn" class="px-3 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ====== Selection Formatting ====== -->
+            <section>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Selection Formatting</h2>
+                <p class="text-sm text-gray-600 mb-3">Select text in the editor, then apply formatting:</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Selection Font Size -->
+                    <div>
+                        <label for="selection-font-size" class="text-sm font-medium text-gray-700">Selected Text Size</label>
+                        <div class="flex space-x-2 mt-2">
+                            <button class="selection-size-btn px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-medium" data-size="\\tiny">Tiny</button>
+                            <button class="selection-size-btn px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-medium" data-size="\\small">Small</button>
+                            <button class="selection-size-btn px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-medium" data-size="\\normalsize">Normal</button>
+                            <button class="selection-size-btn px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-medium" data-size="\\large">Large</button>
+                            <button class="selection-size-btn px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-medium" data-size="\\huge">Huge</button>
+                        </div>
+                    </div>
+                    <!-- Selection Font Color -->
+                    <div>
+                        <label class="text-sm font-medium text-gray-700">Selected Text Color</label>
+                        <div class="flex space-x-2 mt-2">
+                            <button class="selection-color-btn color-swatch bg-gray-900" data-color="black" title="Black"></button>
+                            <button class="selection-color-btn color-swatch bg-red-600" data-color="red" title="Red"></button>
+                            <button class="selection-color-btn color-swatch bg-blue-600" data-color="blue" title="Blue"></button>
+                            <button class="selection-color-btn color-swatch bg-green-600" data-color="green" title="Green"></button>
+                            <button class="selection-color-btn color-swatch bg-purple-600" data-color="purple" title="Purple"></button>
+                            <button class="selection-color-btn color-swatch bg-orange-600" data-color="orange" title="Orange"></button>
                         </div>
                     </div>
                 </div>
@@ -151,6 +200,8 @@
         const previewArea = document.getElementById('preview-area');
         const fontSizeSelect = document.getElementById('font-size-select');
         const colorButtonsContainer = document.getElementById('color-buttons-container');
+        const bgColorPicker = document.getElementById('bg-color-picker');
+        const resetBgBtn = document.getElementById('reset-bg-btn');
 
         // 3. Symbol definitions for the button bar
         const symbols = [
@@ -234,7 +285,9 @@
             try {
                 katex.render(latexString, element, {
                     throwOnError: false,
-                    displayMode: true
+                    displayMode: true,
+                    trust: true, // Enable \textcolor and other commands
+                    strict: false // Allow more LaTeX commands
                 });
             } catch (e) {
                 console.error("KaTeX Error: ", e);
@@ -254,7 +307,7 @@
             previewArea.className = 'text-lg text-gray-900'; // Base classes
             previewArea.classList.add(
                 'w-full', 'min-height-150', 'p-6', 'rounded-lg', 
-                'bg-gray-50', 'border', 'border-dashed', 'border-gray-300', 
+                'border', 'border-dashed', 'border-gray-300', 
                 'transition-all'
             );
             
@@ -267,6 +320,42 @@
                 previewArea.innerHTML = '<p class="text-gray-400">Preview will appear here...</p>';
             } else {
                 renderMath(previewArea, latex);
+            }
+        }
+
+        /**
+         * Applies a LaTeX size command to the selected text in the editor.
+         * @param {string} sizeCommand - The LaTeX size command (e.g., '\\large', '\\small')
+         */
+        function applyFormatToSelection(sizeCommand) {
+            const selection = mainEditor.getSelection();
+            if (selection && selection.latex()) {
+                const selectedLatex = selection.latex();
+                // Wrap the selection in the size command
+                const formattedLatex = `{${sizeCommand} ${selectedLatex}}`;
+                mainEditor.write(formattedLatex);
+                mainEditor.focus();
+                updatePreview();
+            } else {
+                alert('Please select some text in the editor first.');
+            }
+        }
+
+        /**
+         * Applies a color to the selected text in the editor using LaTeX color commands.
+         * @param {string} colorName - The color name (e.g., 'red', 'blue')
+         */
+        function applyColorToSelection(colorName) {
+            const selection = mainEditor.getSelection();
+            if (selection && selection.latex()) {
+                const selectedLatex = selection.latex();
+                // Wrap the selection in a color command
+                const formattedLatex = `\\textcolor{${colorName}}{${selectedLatex}}`;
+                mainEditor.write(formattedLatex);
+                mainEditor.focus();
+                updatePreview();
+            } else {
+                alert('Please select some text in the editor first.');
             }
         }
 
@@ -303,6 +392,36 @@
 
                 // Update the preview
                 updatePreview();
+            });
+
+            // Background color picker
+            bgColorPicker.addEventListener('input', (e) => {
+                previewArea.style.backgroundColor = e.target.value;
+            });
+
+            // Reset background color
+            resetBgBtn.addEventListener('click', () => {
+                bgColorPicker.value = '#F9FAFB';
+                previewArea.style.backgroundColor = '#F9FAFB';
+            });
+
+            // --- Selection Formatting ---
+            // Font size for selected text
+            document.querySelectorAll('.selection-size-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sizeCommand = btn.dataset.size;
+                    applyFormatToSelection(sizeCommand);
+                });
+            });
+
+            // Font color for selected text
+            document.querySelectorAll('.selection-color-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const colorName = btn.dataset.color;
+                    applyColorToSelection(colorName);
+                });
             });
             
             // Initial render
