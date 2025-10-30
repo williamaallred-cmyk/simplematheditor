@@ -61,32 +61,6 @@
             margin: 0;
             font-size: 1.1rem;
         }
-        /* Style for color swatch buttons */
-        .color-swatch {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid #E5E7EB; /* gray-200 */
-            cursor: pointer;
-            transition: transform 0.1s ease;
-        }
-        .color-swatch:hover {
-            transform: scale(1.1);
-        }
-        .color-swatch.active {
-            border-color: #3B82F6; /* blue-500 */
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
-        }
-        /* Style for selection formatting buttons */
-        .selection-size-btn:active,
-        .selection-color-btn:active {
-            transform: scale(0.95);
-        }
-        .selection-size-btn:focus,
-        .selection-color-btn:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
-        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4 md:p-8">
@@ -122,37 +96,6 @@
                         <div class="mt-2 flex items-center space-x-2">
                             <input type="color" id="bg-color-picker" value="#F9FAFB" class="h-10 w-20 border border-gray-300 rounded cursor-pointer">
                             <button id="reset-bg-btn" class="px-3 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300">Reset</button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ====== Selection Formatting ====== -->
-            <section>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Selection Formatting</h2>
-                <p class="text-sm text-gray-600 mb-3">Select text in the editor, then apply formatting:</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Selection Font Size -->
-                    <div>
-                        <label for="selection-font-size" class="text-sm font-medium text-gray-700">Selected Text Size</label>
-                        <div class="flex space-x-2 mt-2">
-                            <button class="selection-size-btn px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-medium" data-size="\\tiny">Tiny</button>
-                            <button class="selection-size-btn px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-medium" data-size="\\small">Small</button>
-                            <button class="selection-size-btn px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-medium" data-size="\\normalsize">Normal</button>
-                            <button class="selection-size-btn px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-medium" data-size="\\large">Large</button>
-                            <button class="selection-size-btn px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-medium" data-size="\\huge">Huge</button>
-                        </div>
-                    </div>
-                    <!-- Selection Font Color -->
-                    <div>
-                        <label class="text-sm font-medium text-gray-700">Selected Text Color</label>
-                        <div class="flex space-x-2 mt-2">
-                            <button class="selection-color-btn color-swatch bg-gray-900" data-color="black" title="Black"></button>
-                            <button class="selection-color-btn color-swatch bg-red-600" data-color="red" title="Red"></button>
-                            <button class="selection-color-btn color-swatch bg-blue-600" data-color="blue" title="Blue"></button>
-                            <button class="selection-color-btn color-swatch bg-green-600" data-color="green" title="Green"></button>
-                            <button class="selection-color-btn color-swatch bg-purple-600" data-color="purple" title="Purple"></button>
-                            <button class="selection-color-btn color-swatch bg-orange-600" data-color="orange" title="Orange"></button>
                         </div>
                     </div>
                 </div>
@@ -295,42 +238,6 @@
             }
         }
 
-        /**
-         * Applies a LaTeX size command to the selected text in the editor.
-         * @param {string} sizeCommand - The LaTeX size command (e.g., '\\large', '\\small')
-         */
-        function applyFormatToSelection(sizeCommand) {
-            const selection = mainEditor.getSelection();
-            if (selection && selection.latex()) {
-                const selectedLatex = selection.latex();
-                // Wrap the selection in the size command
-                const formattedLatex = `{${sizeCommand} ${selectedLatex}}`;
-                mainEditor.write(formattedLatex);
-                mainEditor.focus();
-                updatePreview();
-            } else {
-                alert('Please select some text in the editor first.');
-            }
-        }
-
-        /**
-         * Applies a color to the selected text in the editor using LaTeX color commands.
-         * @param {string} colorName - The color name (e.g., 'red', 'blue')
-         */
-        function applyColorToSelection(colorName) {
-            const selection = mainEditor.getSelection();
-            if (selection && selection.latex()) {
-                const selectedLatex = selection.latex();
-                // Wrap the selection in a color command
-                const formattedLatex = `\\textcolor{${colorName}}{${selectedLatex}}`;
-                mainEditor.write(formattedLatex);
-                mainEditor.focus();
-                updatePreview();
-            } else {
-                alert('Please select some text in the editor first.');
-            }
-        }
-
         // 5. Page/App Initialization
         function initializeAppLogic() {
             // Init MathQuill
@@ -354,25 +261,6 @@
             resetBgBtn.addEventListener('click', () => {
                 bgColorPicker.value = '#F9FAFB';
                 previewArea.style.backgroundColor = '#F9FAFB';
-            });
-
-            // --- Selection Formatting ---
-            // Font size for selected text
-            document.querySelectorAll('.selection-size-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const sizeCommand = btn.dataset.size;
-                    applyFormatToSelection(sizeCommand);
-                });
-            });
-
-            // Font color for selected text
-            document.querySelectorAll('.selection-color-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const colorName = btn.dataset.color;
-                    applyColorToSelection(colorName);
-                });
             });
             
             // Initial render
