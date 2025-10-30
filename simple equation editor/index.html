@@ -116,26 +116,6 @@
             <section>
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">Controls</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Font Size -->
-                    <div>
-                        <label for="font-size-select" class="text-sm font-medium text-gray-700">Preview Font Size</label>
-                        <select id="font-size-select" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <option value="text-base">Small</option>
-                            <option value="text-lg" selected>Medium</option>
-                            <option value="text-xl">Large</option>
-                            <option value="text-2xl">Extra Large</option>
-                        </select>
-                    </div>
-                    <!-- Font Color -->
-                    <div>
-                        <label class="text-sm font-medium text-gray-700">Preview Font Color</label>
-                        <div id="color-buttons-container" data-color="text-gray-900" class="mt-2 flex space-x-2">
-                            <button class="color-swatch bg-gray-900 active" data-color-class="text-gray-900" title="Black"></button>
-                            <button class="color-swatch bg-red-600" data-color-class="text-red-600" title="Red"></button>
-                            <button class="color-swatch bg-blue-600" data-color-class="text-blue-600" title="Blue"></button>
-                            <button class="color-swatch bg-green-600" data-color-class="text-green-600" title="Green"></button>
-                        </div>
-                    </div>
                     <!-- Background Color -->
                     <div>
                         <label class="text-sm font-medium text-gray-700">Preview Background Color</label>
@@ -198,8 +178,6 @@
         // 2. UI Element References
         const mainEditorSpan = document.getElementById('main-editor');
         const previewArea = document.getElementById('preview-area');
-        const fontSizeSelect = document.getElementById('font-size-select');
-        const colorButtonsContainer = document.getElementById('color-buttons-container');
         const bgColorPicker = document.getElementById('bg-color-picker');
         const resetBgBtn = document.getElementById('reset-bg-btn');
 
@@ -300,8 +278,6 @@
          */
         function updatePreview() {
             const latex = mainEditor.latex();
-            const fontSizeClass = fontSizeSelect.value;
-            const colorClass = colorButtonsContainer.dataset.color || 'text-gray-900';
 
             // Reset Tailwind classes on preview area
             previewArea.className = 'text-lg text-gray-900'; // Base classes
@@ -310,10 +286,6 @@
                 'border', 'border-dashed', 'border-gray-300', 
                 'transition-all'
             );
-            
-            // Add new dynamic classes
-            if (fontSizeClass) previewArea.classList.add(fontSizeClass);
-            if (colorClass) previewArea.classList.add(colorClass);
 
             // Render the math
             if (latex.trim() === '') {
@@ -373,27 +345,6 @@
             createSymbolBar(mainEditor, mainEditorSpan); // Add symbol bar
 
             // --- Initialize Controls ---
-            fontSizeSelect.addEventListener('change', updatePreview);
-
-            colorButtonsContainer.addEventListener('click', (e) => {
-                const button = e.target.closest('button.color-swatch');
-                if (!button) return;
-
-                // Remove 'active' from all buttons
-                colorButtonsContainer.querySelectorAll('.color-swatch').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-
-                // Add 'active' to clicked button
-                button.classList.add('active');
-                
-                // Store the selected color class
-                colorButtonsContainer.dataset.color = button.dataset.colorClass;
-
-                // Update the preview
-                updatePreview();
-            });
-
             // Background color picker
             bgColorPicker.addEventListener('input', (e) => {
                 previewArea.style.backgroundColor = e.target.value;
