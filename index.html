@@ -50,7 +50,7 @@
             min-height: 150px;
             padding: 1.5rem;
             border-radius: 0.5rem;
-            background-color: #F9FAFB; /* gray-50 */
+            background-color: transparent;
             border: 1px dashed #D1D5DB; /* gray-300 */
             transition: background-color 0.2s ease-in-out;
             color: #111827; /* default text-gray-900 */
@@ -86,6 +86,23 @@
                 </div>
             </section>
 
+            <!-- ====== Preview ====== -->
+            <section>
+                <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-700">Equation (Take a screenshot to copy)</h2>
+                        <button id="copy-image-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            Screenshot Help
+                        </button>
+                </div>
+                <div id="preview-area" class="text-lg text-gray-900">
+                    <!-- KaTeX rendered output will go here -->
+                </div>
+                <div id="output-image-container" class="mt-4 hidden">
+                    <p class="text-sm text-gray-600 mb-2">The screenshot area is directly above this box. Use your device's screenshot tool to select the equation in the preview area above.</p>
+                    <img id="output-image" class="border-2 border-blue-500 rounded p-2 inline-block bg-white" alt="Equation Image">
+                </div>
+            </section>
+
             <!-- ====== Controls ====== -->
             <section>
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">Controls</h2>
@@ -94,18 +111,10 @@
                     <div>
                         <label class="text-sm font-medium text-gray-700">Preview Background Color</label>
                         <div class="mt-2 flex items-center space-x-2">
-                            <input type="color" id="bg-color-picker" value="#F9FAFB" class="h-10 w-20 border border-gray-300 rounded cursor-pointer">
-                            <button id="reset-bg-btn" class="px-3 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300">Reset</button>
+                            <input type="color" id="bg-color-picker" value="#FFFFFF" class="h-10 w-20 border border-gray-300 rounded cursor-pointer">
+                            <button id="reset-bg-btn" class="px-3 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300">Transparent</button>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            <!-- ====== Preview ====== -->
-            <section>
-                <h2 class="text-2xl font-semibold text-gray-700 mb-4">Live Preview</h2>
-                <div id="preview-area" class="text-lg text-gray-900">
-                    <!-- KaTeX rendered output will go here -->
                 </div>
             </section>
 
@@ -123,6 +132,9 @@
         const previewArea = document.getElementById('preview-area');
         const bgColorPicker = document.getElementById('bg-color-picker');
         const resetBgBtn = document.getElementById('reset-bg-btn');
+        const copyImageBtn = document.getElementById('copy-image-btn');
+        const outputImageContainer = document.getElementById('output-image-container');
+        const outputImage = document.getElementById('output-image');
 
         // 3. Symbol definitions for the button bar
         const symbols = [
@@ -233,9 +245,29 @@
             // Render the math
             if (latex.trim() === '') {
                 previewArea.innerHTML = '<p class="text-gray-400">Preview will appear here...</p>';
+                copyImageBtn.disabled = true;
             } else {
                 renderMath(previewArea, latex);
+                copyImageBtn.disabled = false;
             }
+        }
+
+        /**
+         * Generates a copyable image from the equation
+         */
+        async function copyEquationAsImage() {
+            const latex = mainEditor.latex();
+            if (!latex || latex.trim() === '') {
+                alert('No equation to generate. Please create an equation first.');
+                return;
+            }
+
+            // Simple instruction to user
+            alert('Please use your browser\'s screenshot tool:\n\n' +
+                  'Windows: Press Windows + Shift + S\n' +
+                  'Mac: Press Command + Shift + 4\n\n' +
+                  'Then select the equation in the preview area below. ' + 
+                  'Once done, go to your document and paste the screenshot (Ctrl+V or Command+V).');
         }
 
         // 5. Page/App Initialization
@@ -257,11 +289,14 @@
                 previewArea.style.backgroundColor = e.target.value;
             });
 
-            // Reset background color
+            // Reset background color to transparent
             resetBgBtn.addEventListener('click', () => {
-                bgColorPicker.value = '#F9FAFB';
-                previewArea.style.backgroundColor = '#F9FAFB';
+                bgColorPicker.value = '#FFFFFF';
+                previewArea.style.backgroundColor = 'transparent';
             });
+
+            // Copy equation as image
+            copyImageBtn.addEventListener('click', copyEquationAsImage);
             
             // Initial render
             updatePreview();
